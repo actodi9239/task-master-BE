@@ -27,18 +27,18 @@ exports.createTask = async (req, res) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const { title, description, date, important } = req.body; // Incluye `important`
+        const { title, description, date, important } = req.body; 
         
-        // Almacenar solo la fecha, sin horas
-        const taskDate = new Date(date); // Convierte la fecha a formato Date
-        const utcDate = taskDate.toISOString().split('T')[0]; // Almacena solo la parte de la fecha en UTC
+      
+        const taskDate = new Date(date); 
+        const utcDate = taskDate.toISOString().split('T')[0]; 
 
         const newTask = await Task.create({
             title,
             description,
             userId: decoded.id,
-            date: utcDate, // Almacena solo la fecha
-            important: important || false // Usa el valor recibido o un valor por defecto
+            date: utcDate, 
+            important: important || false 
         });
         res.status(201).json(newTask);
     } catch (err) {
@@ -68,6 +68,7 @@ exports.getTaskById = async (req, res) => {
     }
 };
 
+
 exports.updateTask = async (req, res) => {
     const token = req.header('Authorization')?.split(' ')[1];
     if (!token) {
@@ -76,21 +77,19 @@ exports.updateTask = async (req, res) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Token verificado:', decoded);
-
         const task = await Task.findByPk(req.params.id);
         if (!task || task.userId !== decoded.id) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        // Solo actualiza el estado de la tarea
-        await task.update({ status: req.body.status });
-        res.json({ message: 'Task status updated successfully' });
+        await task.update(req.body); 
+        res.json({ message: 'Task updated successfully' });
     } catch (err) {
         console.error('Error al verificar el token:', err);
         return res.status(403).json({ message: 'Invalid Token' });
     }
 };
+
 
 exports.completeTask = async (req, res) => {
     const token = req.header('Authorization')?.split(' ')[1];
